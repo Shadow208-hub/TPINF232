@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stat AI | Analyse & Collecte</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <section class="hero">
+        <header>
+            <div class="logo-container">
+                <img src="IA5.jpeg" alt="Stat AI Logo" class="logo-img">
+                <a href="#" class="logo-text">STAT<span>AI</span></a>
+            </div>
+            <ul class="navigation">
+                <li><a href="#">Accueil</a></li>
+                <li><a href="#solutions">Analyses</a></li>
+                <li><a href="#collecte">Formulaire</a></li>
+                <li><a href="#" onclick="choisirContact()">Contact</a></li>
+            </ul>
+        </header>
+
+        <div class="content">
+            <h1>L'IA au service de <br><span id="typewriter"></span></h1>
+            <div class="hero-description">
+                <p>Exploitez la puissance du machine learning pour vos statistiques.</p>
+            </div>
+            <div class="btn-container">
+                <a href="http://127.0.0.1:8000/donnees/rapport-pdf/generate" class="btn" target="_blank">Générer rapport-pdf</a>
+                <a href="#solutions" class="btn btn-outline">Explorer les Données</a>
+            </div>
+        </div>
+    </section>
+    <li id="nav-analyses" style="display: none;"><a href="#solutions">Analyses</a></li>
+
+    <section id="solutions" class="features" style="display: none;">
+        <div class="section-title">
+            <h2>Tableau de Bord <span>Analytique</span></h2>
+        </div>
+        
+        <div class="grid-features">
+            <div class="card" onclick="chargerAnalyse('analyse-age', 'Distribution des Âges')">
+                <img src="IA3.jpeg" alt="Analyse Age">
+                <div class="card-info">
+                    <h3>Analyse de l'Âge</h3>
+                    <p>Étude démographique des utilisateurs d'IA.</p>
+                </div>
+            </div>
+            <div class="card" onclick="chargerAnalyse('analyse-par-domaine', 'Répartition par Domaine')">
+                <img src="IA1.jpeg" alt="Domaines">
+                <div class="card-info">
+                    <h3>Analyse Domaine</h3>
+                    <p>Comparaison entre Informatique, Médecine et Ingénierie.</p>
+                </div>
+            </div>
+            <div class="card" onclick="chargerAnalyse('train_model', 'Modèle Prédictif')">
+                <img src="IA2.jpeg" alt="ML">
+                <div class="card-info">
+                    <h3>Modèle Prédictif</h3>
+                    <p>Algorithmes de régression sur la fréquence d'usage.</p>
+                </div>
+            </div>
+            <div class="card" onclick="chargerAnalyse('analyse-grouper', 'Analyse Groupée')">
+                <img src="IA5.jpeg" alt="Groupement">
+                <div class="card-info">
+                    <h3>Analyse Groupée</h3>
+                    <p>Statistiques par sexe et niveau d'étude.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="collecte" class="features" style="background: #0f172a;">
+        <div class="section-title"><h2>Collecte de <span>Données</span></h2></div>
+        <div class="form-wrapper">
+            <form id="dataForm">
+                <div class="form-group">
+                    <label for="age">Quel est votre âge ?</label>
+                    <input type="number" id="age" placeholder="Ex: 21" required min="10" max="100">
+                </div>
+
+                <div class="form-group">
+                    <label for="sexe">Sexe :</label>
+                    <select id="sexe" required>
+                        <option value="Masculin">Masculin</option>
+                        <option value="Feminin">Féminin</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="niveau_etude">Votre niveau d'étude actuel :</label>
+                    <select id="niveau_etude" required>
+                        <option value="lycee">Lycée</option>
+                        <option value="Baccalaureat">Baccalauréat</option>
+                        <option value="Licence">Licence</option>
+                        <option value="Master">Master</option>
+                        <option value="Doctorat">Doctorat</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="domaine">Dans quel domaine évoluez-vous ?</label>
+                    <select id="domaine" required>
+                        <option value="Informatique">Informatique</option>
+                        <option value="Medecine">Médecine</option>
+                        <option value="Ingenierie">Ingénierie</option>
+                        <option value="Finances">Finances</option>
+                        <option value="Autres">Autres</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label id="label-frequence">Fréquence d'usage journalier de l'IA (1 à 30 fois) : <strong>15</strong></label>
+                    <input type="range" id="frequence" min="1" max="30" value="15" oninput="document.querySelector('#label-frequence strong').innerText = this.value">
+                </div>
+
+                <button type="submit" class="btn" style="width: 100%; margin-top: 20px;">Soumettre mes informations</button>
+            </form>
+        </div>
+    </section>
+
+    <div id="result-overlay" class="overlay" style="display:none;">
+        <div class="modal-content">
+            <button class="close-btn" onclick="fermerModal()">×</button>
+            <h2 id="result-title"></h2>
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Fonction pour générer le rapport PDF avec gestion d'erreur
+        function genererRapportPDF(event) {
+            event.preventDefault();
+            const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://127.0.0.1:8000' 
+                : 'https://votre-domaine.com';
+            
+            window.open(`${API_BASE_URL}/donnees/rapport-pdf/generate`, '_blank');
+        }
+    </script>
+    <script src="index.js"></script>
+</body>
+</html>
