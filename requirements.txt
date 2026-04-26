@@ -1,0 +1,8 @@
+fastapi
+numpy
+uvicorn
+sqlalchemy
+pandas
+scikit-learn
+reportlab
+python-multipart
