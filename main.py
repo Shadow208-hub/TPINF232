@@ -3,6 +3,7 @@ from routes import router
 from fastapi.middleware.cors import CORSMiddleware
 from models import create_table
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 # Créer les tables au démarrage
 create_table()
