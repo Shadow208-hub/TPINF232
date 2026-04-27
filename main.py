@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from routes import router
 from fastapi.middleware.cors import CORSMiddleware
 from models import create_table
-
+from fastapi.responses import FileResponse
 # Créer les tables
 create_table()
 
@@ -19,6 +19,15 @@ app.add_middleware(
 )
 app.include_router(router)
 
+# Route pour le public (Lien normal)
+@app.get("/")
+async def read_public():
+    return FileResponse("index.html")
+
+# Route pour le prof (Lien secret)
+@app.get("/prof-admin-2026")
+async def read_admin():
+    return FileResponse("admin.html")
 
 @app.get("/", tags=["Root"])
 def root():
