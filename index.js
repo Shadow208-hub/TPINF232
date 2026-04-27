@@ -125,62 +125,63 @@ function choisirContact() {
 }
 
 // --- CHARGEMENT DES ANALYSES ---
-async function chargerAnalyse(type, titre) {
+async function chargerAnalyse(type) {
+    const overlay = document.getElementById('result-overlay');
+    const title = document.getElementById('result-title');
+    
+    // 1. Mapping des endpoints (Correction cruciale pour Render)
+    let endpoint = "";
+    switch(type) {
+        case 'analyse-age': 
+            endpoint = "/donnees/rapport-stats-globale"; break;
+        case 'train_model': 
+            endpoint = "/donnees/rapport-ml"; break;
+        case 'analyse-grouper': 
+            endpoint = "/donnees/analyse-grouper"; break;
+        default: 
+            endpoint = `/donnees/${type}`;
+    }
+
     try {
-        let endpoint = `${API_BASE_URL}/donnees/`;
+        // On utilise l'URL complète avec le préfixe /donnees
+        const res = await fetch(`${API_BASE_URL}${endpoint}`);
         
-        // Mapping des endpoints selon votre routes.py
-        switch(type) {
-            case 'analyse-age': endpoint += `rapport-stats-globale`; break;
-            case 'analyse-par-domaine': endpoint += `groupement-data`; break;
-            case 'train_model': endpoint += `rapport-ml`; break;
-            case 'analyse-grouper': endpoint += `analyse-grouper`; break;
-            default: endpoint += `rapport-stats-globale`;
-        }
-
-        const response = await fetch(endpoint);
-        if (!response.ok) throw new Error(`Erreur ${response.status}`);
+        if (!res.ok) throw new Error(`Erreur HTTP: ${res.status}`);
         
-        const data = await response.json();
-        
-        const overlay = document.getElementById('result-overlay');
-        const title = document.getElementById('result-title');
-        
-        if (!overlay || !title) return;
+        const data = await res.json();
 
-        // Nettoyage des anciennes stats textuelles
-        const oldStats = document.getElementById('stats-text');
-        if (oldStats) oldStats.remove();
+        if (overlay) overlay.style.display = 'flex';
+        if (title) title.innerText = type.replace(/-/g, ' ').toUpperCase();
 
-        overlay.style.display = 'flex';
-        title.innerText = titre;
-
-        const statsDiv = document.createElement('div');
+        const canvas = document.getElementById('myChart');
+        const statsDiv = document.getElementById('stats-text') || document.createElement('div');
         statsDiv.id = 'stats-text';
-        statsDiv.style.color = '#fff';
-        statsDiv.style.marginBottom = '20px';
+        statsDiv.innerHTML = ''; 
 
+        // Affichage des données textuelles
         let htmlContent = "";
-        function parseData(obj, gap = '') {
+        function parseData(obj, gap = "") {
             for (const [k, v] of Object.entries(obj)) {
-                if (k.toLowerCase().includes('graphique')) continue;
+                if (k.toLowerCase().includes('graphique') || k.toLowerCase().includes('histogramme')) continue;
                 if (typeof v === 'object' && v !== null) {
-                    htmlContent += `<p><strong>${gap}${k.replace(/_/g, ' ')} :</strong></p>`;
-                    parseData(v, gap + '&nbsp;&nbsp;');
+                    htmlContent += `<p><strong>${gap}${k} :</strong></p>`;
+                    parseData(v, gap + "  ");
                 } else {
-                    htmlContent += `<p>${gap}${k.replace(/_/g, ' ')} : ${typeof v === 'number' ? v.toFixed(2) : v}</p>`;
+                    htmlContent += `<p>${gap}${k} : ${typeof v === 'number' ? v.toFixed(2) : v}</p>`;
                 }
             }
         }
         
         parseData(data);
         statsDiv.innerHTML = htmlContent;
-        title.after(statsDiv);
+        if (title) title.after(statsDiv);
 
+        // Rendu du graphique Chart.js
         renderChart(data);
 
     } catch (err) {
-        Swal.fire('Erreur', 'Impossible de charger les données.', 'error');
+        console.error("Erreur de chargement:", err);
+        Swal.fire('Erreur', `Impossible de charger : ${err.message}`, 'error');
     }
 }
 
