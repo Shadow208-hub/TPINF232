@@ -31,3 +31,4 @@ async def read_public():
 @app.get("/prof-admin-2026")
 async def read_admin():
     return FileResponse("admin.html")
+    
