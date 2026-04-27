@@ -138,6 +138,8 @@ async function chargerAnalyse(type) {
             endpoint = "/donnees/rapport-ml"; break;
         case 'analyse-grouper': 
             endpoint = "/donnees/analyse-grouper"; break;
+        case 'analyse-domaine'
+            endpoint = "/donnees/groupement-data"; break;
         default: 
             endpoint = `/donnees/${type}`;
     }
