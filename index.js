@@ -15,7 +15,7 @@ function type() {
 // Configuration de l'API - À modifier selon votre environnement
 const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
     ? 'http://127.0.0.1:8000' 
-    : 'https://https://tpinf232-yohr.onrender.com'; // Remplacez par votre URL de production
+    : 'https://tpinf232-yohr.onrender.com'; // Remplacez par votre URL de production
 
 // --- FORMULAIRE ---
 const form = document.getElementById('dataForm');
