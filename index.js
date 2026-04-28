@@ -66,15 +66,20 @@ let myChart = null;
 
 function renderChart(data) {
     const canvas = document.getElementById('myChart');
-    if (!canvas) return;
+    if (!canvas) {
+        console.error('Canvas myChart introuvable');
+        return;
+    }
     
     const ctx = canvas.getContext('2d');
+    
     if (myChart) myChart.destroy();
 
+    // Logique pour extraire les données selon le format
     let labels = [];
     let values = [];
 
-    // Extraction des données selon le format de l'API
+    // Priorité aux données de fréquence par sexe
     if (data.General && data.General.frequence_sexe) {
         labels = Object.keys(data.General.frequence_sexe);
         values = Object.values(data.General.frequence_sexe);
@@ -85,28 +90,36 @@ function renderChart(data) {
         labels = Object.keys(data.Moyenne_par_domaine);
         values = Object.values(data.Moyenne_par_domaine);
     } else {
-        labels = Object.keys(data).filter(k => typeof data[k] !== 'object');
+        // Fallback pour les autres types de groupements
+        labels = Object.keys(data).filter(k => typeof data[k] !== 'object' && !k.includes('graphique') && !k.includes('Histogramme'));
         values = labels.map(k => data[k]);
     }
 
-    if (labels.length === 0) return;
+    // Vérifier qu'on a des données à afficher
+    if (labels.length === 0 || values.length === 0) {
+        console.warn('Aucune donnée graphique disponible');
+        return;
+    }
 
     myChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Statistiques',
+                label: 'Répartition',
                 data: values,
                 backgroundColor: ['#38bdf8', '#fbbf24', '#f87171', '#34d399', '#a78bfa'],
                 borderWidth: 1
             }]
         },
-        options: { responsive: true }
+        options: { 
+            responsive: true,
+            maintainAspectRatio: true
+        }
     });
 }
 
-// --- CONTACTS ---
+// --- CONTACTS CORRIGÉS ---
 function choisirContact() {
     Swal.fire({
         title: 'Me contacter',
@@ -123,67 +136,97 @@ function choisirContact() {
         }
     });
 }
-
 // --- CHARGEMENT DES ANALYSES ---
-async function chargerAnalyse(type) {
-    const overlay = document.getElementById('result-overlay');
-    const title = document.getElementById('result-title');
-    
-    // 1. Mapping des endpoints (Correction cruciale pour Render)
-    let endpoint = "";
-    switch(type) {
-        case 'analyse-age': 
-            endpoint = "/donnees/rapport-stats-globale"; break;
-        case 'train_model': 
-            endpoint = "/donnees/rapport-ml"; break;
-        case 'analyse-grouper': 
-            endpoint = "/donnees/analyse-grouper"; break;
-        case 'analyse-domaine'
-            endpoint = "/donnees/groupement-data"; break;
-        default: 
-            endpoint = `/donnees/${type}`;
-    }
-
+async function chargerAnalyse(type, titre) {
     try {
-        // On utilise l'URL complète avec le préfixe /donnees
-        const res = await fetch(`${API_BASE_URL}${endpoint}`);
+        let endpoint = '';
         
-        if (!res.ok) throw new Error(`Erreur HTTP: ${res.status}`);
+        // Mapper les types d'analyse aux bons endpoints
+        switch(type) {
+            case 'analyse-age':
+                endpoint = `${API_BASE_URL}/donnees/rapport-stats-globale`;
+                break;
+            case 'analyse-par-domaine':
+                endpoint = `${API_BASE_URL}/donnees/groupement-data`;
+                break;
+            case 'train_model':
+                endpoint = `${API_BASE_URL}/donnees/rapport-ml`;
+                break;
+            case 'analyse-grouper':
+                endpoint = `${API_BASE_URL}/donnees/analyse-grouper`;
+                break;
+            default:
+                endpoint = `${API_BASE_URL}/donnees/rapport-stats-globale`;
+        }
+
+        const response = await fetch(endpoint);
         
-        const data = await res.json();
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || `Erreur serveur (${response.status})`);
+        }
+        
+        const data = await response.json();
+        
+        const overlay = document.getElementById('result-overlay');
+        const title = document.getElementById('result-title');
+        const container = document.querySelector('.modal-content');
 
-        if (overlay) overlay.style.display = 'flex';
-        if (title) title.innerText = type.replace(/-/g, ' ').toUpperCase();
+        if (!overlay || !title || !container) {
+            console.error('Éléments de la modale introuvables');
+            return;
+        }
 
-        const canvas = document.getElementById('myChart');
-        const statsDiv = document.getElementById('stats-text') || document.createElement('div');
+        // Nettoyage des anciens textes de stats pour éviter l'accumulation
+        const oldStats = document.getElementById('stats-text');
+        if (oldStats) oldStats.remove();
+
+        overlay.style.display = 'flex';
+        title.innerText = titre;
+
+        // --- AFFICHAGE DES DONNÉES TEXTUELLES ---
+        const statsDiv = document.createElement('div');
         statsDiv.id = 'stats-text';
-        statsDiv.innerHTML = ''; 
+        statsDiv.style.marginBottom = '20px';
+        statsDiv.style.color = '#fff';
+        statsDiv.style.maxHeight = '300px';
+        statsDiv.style.overflowY = 'auto';
 
-        // Affichage des données textuelles
         let htmlContent = "";
-        function parseData(obj, gap = "") {
-            for (const [k, v] of Object.entries(obj)) {
-                if (k.toLowerCase().includes('graphique') || k.toLowerCase().includes('histogramme')) continue;
-                if (typeof v === 'object' && v !== null) {
-                    htmlContent += `<p><strong>${gap}${k} :</strong></p>`;
-                    parseData(v, gap + "  ");
-                } else {
-                    htmlContent += `<p>${gap}${k} : ${typeof v === 'number' ? v.toFixed(2) : v}</p>`;
+        
+        // Fonction récursive pour afficher les données imbriquées
+        function afficherDonnees(obj, prefix = '') {
+            for (const [key, value] of Object.entries(obj)) {
+                // Ne pas afficher les graphiques en texte
+                if (key.toLowerCase().includes('graphique') || 
+                    key.toLowerCase().includes('histogramme') || 
+                    key.toLowerCase().includes('heatmap')) {
+                    continue;
+                }
+                
+                if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                    htmlContent += `<p><strong>${prefix}${key.replace(/_/g, ' ')} :</strong></p>`;
+                    afficherDonnees(value, '&nbsp;&nbsp;');
+                } else if (typeof value === 'number') {
+                    htmlContent += `<p>${prefix}<strong>${key.replace(/_/g, ' ')} :</strong> ${value.toFixed(2)}</p>`;
+                } else if (typeof value !== 'object') {
+                    htmlContent += `<p>${prefix}<strong>${key.replace(/_/g, ' ')} :</strong> ${value}</p>`;
                 }
             }
         }
         
-        parseData(data);
+        afficherDonnees(data);
         statsDiv.innerHTML = htmlContent;
-        if (title) title.after(statsDiv);
+        
+        // On insère les textes avant le canvas du graphique
+        title.after(statsDiv);
 
-        // Rendu du graphique Chart.js
+        // --- AFFICHAGE DU GRAPHIQUE ---
         renderChart(data);
 
     } catch (err) {
-        console.error("Erreur de chargement:", err);
-        Swal.fire('Erreur', `Impossible de charger : ${err.message}`, 'error');
+        console.error('Erreur lors du chargement:', err);
+        Swal.fire('Erreur', `Impossible de charger les statistiques: ${err.message}`, 'error');
     }
 }
 
