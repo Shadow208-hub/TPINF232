@@ -20,7 +20,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.mount("/static", StaticFiles(directory="."), name="static")
+if os.path.exists("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+else:
+    app.mount("/static", StaticFiles(directory="."), name="static")
 app.include_router(router)
 
 # Route pour le public (Lien normal) : Affiche le formulaire simple
