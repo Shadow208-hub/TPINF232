@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stat AI | Analyse & Collecte</title>
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="/static/index.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -13,7 +13,7 @@
     <section class="hero">
         <header>
             <div class="logo-container">
-                <img src="IA5.jpeg" alt="Stat AI Logo" class="logo-img">
+                <img src="/sattic/IA5.jpeg" alt="Stat AI Logo" class="logo-img">
                 <a href="#" class="logo-text">STAT<span>AI</span></a>
             </div>
             <ul class="navigation">
@@ -44,28 +44,28 @@
         
         <div class="grid-features">
             <div class="card" onclick="chargerAnalyse('analyse-age', 'Distribution des Âges')">
-                <img src="IA3.jpeg" alt="Analyse Age">
+                <img src="/static/IA3.jpeg" alt="Analyse Age">
                 <div class="card-info">
                     <h3>Analyse de l'Âge</h3>
                     <p>Étude démographique des utilisateurs d'IA.</p>
                 </div>
             </div>
             <div class="card" onclick="chargerAnalyse('analyse-par-domaine', 'Répartition par Domaine')">
-                <img src="IA1.jpeg" alt="Domaines">
+                <img src="/static/IA1.jpeg" alt="Domaines">
                 <div class="card-info">
                     <h3>Analyse Domaine</h3>
                     <p>Comparaison entre Informatique, Médecine et Ingénierie.</p>
                 </div>
             </div>
             <div class="card" onclick="chargerAnalyse('train_model', 'Modèle Prédictif')">
-                <img src="IA.jpeg" alt="ML">
+                <img src="/static/IA.jpeg" alt="ML">
                 <div class="card-info">
                     <h3>Modèle Prédictif</h3>
                     <p>Algorithmes de régression sur la fréquence d'usage.</p>
                 </div>
             </div>
             <div class="card" onclick="chargerAnalyse('analyse-grouper', 'Analyse Groupée')">
-                <img src="IA2.jpeg" alt="Groupement">
+                <img src="/static/IA2.jpeg" alt="Groupement">
                 <div class="card-info">
                     <h3>Analyse Groupée</h3>
                     <p>Statistiques par sexe et niveau d'étude.</p>
@@ -137,11 +137,11 @@
             event.preventDefault();
             const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
                 ? 'http://127.0.0.1:8000' 
-                : 'https://votre-domaine.com';
+                : 'https://window.location.origin';
             
             window.open(`${API_BASE_URL}/donnees/rapport-pdf/generate`, '_blank');
         }
     </script>
-    <script src="index.js"></script>
+    <script src="/static/index.js"></script>
 </body>
 </html>
