@@ -26,10 +26,10 @@ app.include_router(router)
 # Route pour le public (Lien normal) : Affiche le formulaire simple
 @app.get("/")
 async def read_public():
-    return FileResponse("index.html")
+    return FileResponse("formulaire.html")
 
 # Route pour le prof (Lien secret) : Affiche l'interface complète
 @app.get("/prof-admin-2026")
 async def read_admin():
-    return FileResponse("admin.html")
+    return FileResponse("index.html")
     
