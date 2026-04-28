@@ -322,7 +322,7 @@ async function chargerAnalyse(type, titre) {
 
 function verifierAcces() {
     const urlParams = new URLSearchParams(window.location.search);
-    const isAdmin = urlParams.get('admin');
+    const isAdmin = urlParams.get('index');
 
     const sectionAnalyses = document.getElementById('solutions');
     const lienNavAnalyses = document.getElementById('nav-analyses');
