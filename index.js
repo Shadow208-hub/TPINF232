@@ -240,16 +240,21 @@ function verifierAcces() {
     if (isAdmin === "prof2026") { 
         if(sectionAnalyses) sectionAnalyses.style.display = 'block';
         if(lienNavAnalyses) lienNavAnalyses.style.display = 'block';
-    }
+        console.log("Acces administrateur active");
+    }else{
+        if(sectionAnalyses) sectionAnalyses.style.display = 'none';
+        if(lienNavAnalyses) lienNavAnalyses.style.display = 'none';
 }
+}
+// --- INITIALISATION ---
+document.addEventListener('DOMContentLoaded', () => {
+    type();
+    verifierAcces();
+});
 
 function fermerModal() {
     const overlay = document.getElementById('result-overlay');
     if (overlay) overlay.style.display = 'none';
 }
 
-// --- INITIALISATION ---
-document.addEventListener('DOMContentLoaded', () => {
-    type();
-    verifierAcces();
-});
+
