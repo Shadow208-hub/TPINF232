@@ -36,7 +36,7 @@ def generate_pdf(data: dict, filename="rapport.pdf"):
     if data.get("ml") is not None:
         elements.append(Paragraph("Resultats Machine Learning:", styles["Heading2"]))
         elements.append(Paragraph(f"<b>R2_score</b>: {data['ml']['R2_score']:.4f}", styles["Normal"]))
-        elements.append(Paragraph(f"<b>MSE</b>: {data['ml']['MSE']:.4f}", styles["Normal"]))  # Correction: MSE au lieu de MAE
+        elements.append(Paragraph(f"<b>MSE</b>: {data['ml'].get('MSE', data['ml'].get('mse', 0)):.4f}", styles["Normal"]))  # Correction: MSE au lieu de MAE
         elements.append(Paragraph(f"<b>Intercept</b>: {data['ml']['intercept']:.4f}", styles["Normal"]))
         elements.append(Spacer(1, 12))
         
