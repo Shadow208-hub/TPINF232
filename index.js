@@ -36,7 +36,7 @@ if (dataForm) {
             Domaine: document.getElementById('domaine').value,
             Frequence: parseInt(document.getElementById('frequence').value),
             Niveau_etude: document.getElementById('niveau_etude').value,
-            Temps_moyen: "1h-2h" 
+            Temps_moyen: "ENTRE_15_30" 
         };
 
         try {
