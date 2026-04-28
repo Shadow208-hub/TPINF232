@@ -32,10 +32,10 @@ if (dataForm) {
 
         const payload = {
             age: parseInt(document.getElementById('age').value),
-            Sexe: document.getElementById('Sexe').value,
-            Domaine: document.getElementById('Domaine').value,
-            Frequence: parseInt(document.getElementById('Frequence').value),
-            Niveau_etude: document.getElementById('Niveau_etude').value,
+            Sexe: document.getElementById('sexe').value,
+            Domaine: document.getElementById('domaine').value,
+            Frequence: parseInt(document.getElementById('frequence').value),
+            Niveau_etude: document.getElementById('niveau_etude').value,
             Temps_moyen: "1h-2h" 
         };
 
