@@ -46,7 +46,7 @@ if (form) {
             Domaine: document.getElementById('domaine').value,
             Frequence: frequence,
             Niveau_etude: document.getElementById('niveau_etude').value,
-            Temps_moyen: "1h-2h" // Valeur par défaut
+            Temps_moyen: "1-5 min" // Valeur par défaut
         };
 
         try {
