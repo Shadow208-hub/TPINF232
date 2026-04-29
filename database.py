@@ -2,8 +2,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./app.db"  # Correction: chemin relatif correct
-moteur = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+SQLALCHEMY_DATABASE_URL = os.environ.get("SQLALCHEMY_DATABASE_URL","sqlite:///./app.db")  # Correction: chemin relatif correct
+if SQLALCHEMY_DATABASE_URL.startwith("postgres://"):
+    SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql://")
+
+Connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startwith("sqlite") else {}
+moteur = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=Connect_args})
 Localsession = sessionmaker(autocommit=False, autoflush=False, bind=moteur)
 
 Base = declarative_base()
