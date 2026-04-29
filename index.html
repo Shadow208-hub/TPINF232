@@ -128,17 +128,6 @@
         </div>
     </div>
 
-    <script>
-        // Fonction pour générer le rapport PDF avec gestion d'erreur
-        function genererRapportPDF(event) {
-            event.preventDefault();
-            const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                ? 'http://127.0.0.1:8000' 
-                : 'https://tpinf232-yohr.onrender.com';
-            
-            window.open(`${API_BASE_URL}/donnees/rapport-pdf/generate`, '_blank');
-        }
-    </script>
     <script src="/static/index.js"></script>
 </body>
 </html>
