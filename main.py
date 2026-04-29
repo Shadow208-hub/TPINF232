@@ -16,24 +16,22 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://tpinf232-yohr.onrender.com", "http://localhost:5500", "http://127.0.0.1:5500"],
+    # ✅ CORRECTION : Ajout des origines locales FastAPI (port 8000) pour les tests en développement
+    allow_origins=[
+        "https://tpinf232-yohr.onrender.com",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 if os.path.exists("static"):
     app.mount("/static", StaticFiles(directory="static"), name="static")
 else:
     app.mount("/static", StaticFiles(directory="."), name="static")
+
 app.include_router(router)
-
-# Route pour le public (Lien normal) : Affiche le formulaire simple
-@app.get("/")
-async def read_public():
-    return FileResponse("formulaire.html")
-
-# Route pour le prof (Lien secret) : Affiche l'interface complète
-@app.get("/prof-admin-2026")
-async def read_admin():
-    return FileResponse("index.html")
-    
