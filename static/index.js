@@ -221,7 +221,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 Domaine:      document.getElementById('domaine').value,
                 Frequence:    freqVal,
                 Niveau_etude: document.getElementById('niveau_etude').value,
-                Temps_moyen:  "1-5 min"
+                Temps_moyen:  "1-5 min",
+                Type_utilisation: "etudes"
             };
 
             try {
