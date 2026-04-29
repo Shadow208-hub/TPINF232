@@ -228,7 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/donnees/`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json',
+                             'Accept': 'application/json'},
                     body: JSON.stringify(payload)
                 });
 
