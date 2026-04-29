@@ -5,6 +5,7 @@ from models import create_table
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import os
+import uvicorn
 
 # Créer les tables au démarrage
 create_table()
@@ -39,7 +40,7 @@ async def read_public():
     if os.path.exists(path):
         return FileResponse(path)
     return {"status": "API OK",
-            "Placez index.html dans /static/"
+            "message": "Placez index.html dans /static/"
            }
 
 # Route pour le prof (Lien secret) : Affiche l'interface complète
