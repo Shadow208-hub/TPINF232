@@ -28,16 +28,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-@app.get("/")
-async def root():
-    index_path = os.path.join("static", "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    return {"message": "API StatAI operationnelle. )
-
-            
+if os.path.exists("static"):
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+else:
+    app.mount("/static", StaticFiles(directory="."), name="static")
 app.include_router(router)
-PORT = int(os.environ.get("PORT", 8000))  
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=PORT)
+@app.get("/")
+async def read_public():
+    return FileResponse("formulaire.html")
+
+# Route pour le prof (Lien secret) : Affiche l'interface complète
+@app.get("/prof-admin-2026")
+async def read_admin():
+    return FileResponse("index.html")
+    
