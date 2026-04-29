@@ -38,7 +38,9 @@ async def read_public():
     path = os.path.join(STATIC_DIR, "index.html")
     if os.path.exists(path):
         return FileResponse(path)
-    return {"status": "API OK", "Placew index.html dans /static/"}
+    return {"status": "API OK",
+            "Placez index.html dans /static/"
+           }
 
 # Route pour le prof (Lien secret) : Affiche l'interface complète
 @app.get("/prof-admin-2026")
