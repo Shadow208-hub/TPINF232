@@ -10,7 +10,7 @@ class DataBase(BaseModel):
     Domaine: DOMAINE 
     Frequence: int 
     Temps_moyen: TempsMoyen
-    Type_utilisation: Optional[Utilisation] = Utilisation.DIVERTISSEMENT
+    Type_utilisation: Optional[Utilisation] = Utilisation.ETUDES
     
 
 class Datasave(DataBase):
