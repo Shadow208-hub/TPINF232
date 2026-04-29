@@ -6,6 +6,10 @@
     <title>Stat AI | Collecte de Données</title>
     <link rel="stylesheet" href="/static/index.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- ✅ CORRECTION 1 : SweetAlert2 manquait → causait l'échec silencieux du bouton submit -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- ✅ CORRECTION 2 : Chart.js manquait → évite un crash si renderChart est appelé -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <section class="hero">
