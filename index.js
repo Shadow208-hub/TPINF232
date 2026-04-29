@@ -64,17 +64,17 @@ function renderChart(data) {
     }
 
     if (labels.length === 0 || values.length === 0){
-        const container = document.querySelector('modal-content');
+        const container = document.querySelector('.modal-content');
         if (container && !document.getElementById('no-data-msg')){
             const msg = document.createElement('p');
             msg.id = 'no-data-msg';
-            msg.title.cssText = ' color:#fbbf24; text-align: center; margin-top:16px; font-size:1rem;';
+            msg.style.cssText = ' color:#fbbf24; text-align: center; margin-top:16px; font-size:1rem;';
             msg.innerText = "Aucune donnee disponible. soumettez d'abord des reponses via le formulaire.";
             container.appendChild(msg);
         }
         return ;
     }
-    const noDataMsg = document.getElementById('-no-data-msg');
+    const noDataMsg = document.getElementById('no-data-msg');
     if (noDataMsg) noDataMsg.remove();
     
     myChart = new Chart(ctx, {
