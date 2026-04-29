@@ -18,7 +18,8 @@
             </div>
             <ul class="navigation">
                 <li><a href="#">Accueil</a></li>
-                <li><a href="#solutions">Analyses</a></li>
+                <!-- ✅ CORRECTION 1 : id nav-analyses placé ICI dans le bon <ul>, plus orphelin hors structure -->
+                <li id="nav-analyses" style="display: none;"><a href="#solutions">Analyses</a></li>
                 <li><a href="#collecte">Formulaire</a></li>
                 <li><a href="#" onclick="choisirContact()">Contact</a></li>
             </ul>
@@ -27,21 +28,21 @@
         <div class="content">
             <h1>L'IA au service de <br><span id="typewriter"></span></h1>
             <div class="hero-description">
-                <p>Exploitez la puissance du machine learning pour vos recherchers.</p>
+                <p>Exploitez la puissance du machine learning pour vos recherches.</p>
             </div>
             <div class="btn-container">
-                <a href="https://tpinf232-yohr.onrender.com/donnees/rapport-pdf/generate" class="btn">Générer rapport-pdf</a>
+                <!-- ✅ CORRECTION 2 : bouton PDF utilise genererRapportPDF() au lieu d'une URL hardcodée prod -->
+                <a href="#" onclick="genererRapportPDF(event)" class="btn">Générer rapport-pdf</a>
                 <a href="#solutions" class="btn btn-outline">Explorer les Données</a>
             </div>
         </div>
     </section>
-    <li id="nav-analyses" style="display: none;"><a href="#solutions">Analyses</a></li>
 
     <section id="solutions" class="features" style="display: none;">
         <div class="section-title">
             <h2>Tableau de Bord <span>Analytique</span></h2>
         </div>
-        
+
         <div class="grid-features">
             <div class="card" onclick="chargerAnalyse('analyse-age', 'Distribution des Âges')">
                 <img src="/static/IA3.jpeg" alt="Analyse Age">
@@ -82,7 +83,6 @@
                     <label for="age">Quel est votre âge ?</label>
                     <input type="number" id="age" placeholder="Ex: 21" required min="10" max="100">
                 </div>
-
                 <div class="form-group">
                     <label for="sexe">Sexe :</label>
                     <select id="sexe" required>
@@ -90,7 +90,6 @@
                         <option value="Feminin">Féminin</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label for="niveau_etude">Votre niveau d'étude actuel :</label>
                     <select id="niveau_etude" required>
@@ -101,7 +100,6 @@
                         <option value="Doctorat">Doctorat</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label for="domaine">Dans quel domaine évoluez-vous ?</label>
                     <select id="domaine" required>
@@ -112,12 +110,11 @@
                         <option value="Autres">Autres</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label id="label-frequence">Fréquence d'usage journalier de l'IA (1 à 30 fois) : <strong>15</strong></label>
-                    <input type="range" id="frequence" min="1" max="30" value="15" oninput="document.querySelector('#label-frequence strong').innerText = this.value">
+                    <input type="range" id="frequence" min="1" max="30" value="15"
+                        oninput="document.querySelector('#label-frequence strong').innerText = this.value">
                 </div>
-
                 <button type="submit" class="btn" style="width: 100%; margin-top: 20px;">Soumettre mes informations</button>
             </form>
         </div>
