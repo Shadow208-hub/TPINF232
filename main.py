@@ -36,7 +36,7 @@ app.include_router(router)
 
 @app.get("/")
 async def read_public():
-    return FileResponse("formulaire.html")
+    return FileResponse("index.html")
 
 # Route pour le prof (Lien secret) : Affiche l'interface complète
 @app.get("/prof-admin-2026")
