@@ -63,11 +63,20 @@ function renderChart(data) {
         values = labels.map(k => data[k]);
     }
 
-    if (labels.length === 0 || values.length === 0) {
-        console.warn('Aucune donnée graphique disponible');
-        return;
+    if (labels.length === 0 || values.length === 0){
+        const container = document.querySelector('modal-content');
+        if (container && !document.getElementById('no-data-msg')){
+            const msg = document.createElement('p');
+            msg.id = 'no-data-msg';
+            msg.title.cssText = ' color:#fbbf24; text-align: center; margin-top:16px; font-size:1rem;';
+            msg.innerText = "Aucune donnee disponible. soumettez d'abord des reponses via le formulaire.";
+            container.appendChild(msg);
+        }
+        return ;
     }
-
+    const noDataMsg = document.getElementById('-no-data-msg');
+    if (noDataMsg) noDataMsg.remove();
+    
     myChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -129,6 +138,8 @@ async function chargerAnalyse(type, titre) {
 
         const oldStats = document.getElementById('stats-text');
         if (oldStats) oldStats.remove();
+        const oldMsg = document.getElementById('no-data-msg');
+        if (oldMsg) oldMsg.remove()
 
         overlay.style.display = 'flex';
         title.innerText = titre;
@@ -165,13 +176,16 @@ async function chargerAnalyse(type, titre) {
 
 // --- ACCÈS ADMIN ---
 function verifierAcces() {
-    const isAdmin = new URLSearchParams(window.location.search).get('admin');
+    const path   = window.location.pathname;
+    const param  = new URLSearchParams(window.location.search).get('admin');
+    const isAdmin= (path  === '/prof-admin-2026') || (param === 'prof2026');
+
     const sectionAnalyses = document.getElementById('solutions');
     const lienNavAnalyses = document.getElementById('nav-analyses');
 
-    if (isAdmin === "prof2026") {
+    if (isAdmin) {
         if (sectionAnalyses) sectionAnalyses.style.display = 'block';
-        if (lienNavAnalyses) lienNavAnalyses.style.display = 'block';
+        if (lienNavAnalyses) lienNavAnalyses.style.display = 'inline-block';
         console.log("Accès administrateur activé");
     } else {
         if (sectionAnalyses) sectionAnalyses.style.display = 'none';
@@ -199,12 +213,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (localStorage.getItem('form_envoye')) {
                 return Swal.fire('Attention', 'Vous avez déjà rempli ce formulaire.', 'warning');
             }
-
+            const ageVal = parseInt(document.getElementById('age').value);
+            const freqVal = parseInt(document.getElementById('frequence').value);
             const payload = {
-                age:          parseInt(document.getElementById('age').value),
+                age:          ageVal,
                 Sexe:         document.getElementById('sexe').value,
                 Domaine:      document.getElementById('domaine').value,
-                Frequence:    parseInt(document.getElementById('frequence').value),
+                Frequence:    freqVal,
                 Niveau_etude: document.getElementById('niveau_etude').value,
                 Temps_moyen:  "1-5 min"
             };
