@@ -32,4 +32,4 @@ class DataResponse(DataBase):
     
     class Config:
         from_attributes = True
-        use_enum_values = True  # Correction: orthographe
+        use_enum_values = True # Correction: orthographe
