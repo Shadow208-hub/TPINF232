@@ -9,7 +9,7 @@ class DataBase(BaseModel):
     Sexe: SEXE 
     Domaine: DOMAINE 
     Frequence: int 
-    Temps_moyen: TempsMoyen
+    Temps_moyen: TempsMoyen = TempsMoyen.MOINS_5
     Type_utilisation: Optional[Utilisation] = Utilisation.ETUDES
     
 
