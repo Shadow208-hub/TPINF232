@@ -7,3 +7,4 @@ scikit-learn
 reportlab
 python-multipart
 matplotlib
+psycopg2-binary
