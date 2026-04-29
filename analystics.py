@@ -43,6 +43,9 @@ def analyse_age(df: pd.DataFrame):
     """Analyse de la corrélation entre âge et fréquence"""
     correlation = df['age'].corr(df['Frequence'])
     # Nuage de points
+    if np.isnan(correlation):
+        correlation = 0.0
+        
     fig, ax = plt.subplots(figsize=(6, 9))
     ax.scatter(df['age'], df['Frequence'], alpha=0.5)
     ax.set_title(f"Correlation age / Frequence (R={correlation:.2f})")
@@ -89,8 +92,14 @@ def regression(df: pd.DataFrame):
     """Droite de régression entre les âges et les fréquences d'utilisation"""
     x = df["age"]
     y = df["Frequence"]
+    if len(df) < 2:
+        return {"Pente": 0.0, "Ordonnee": 0.0, "graphique": ""}
     coef = np.polyfit(x, y, 1)
     a, b = coef
+
+    # Sécurité NaN
+    a = 0.0 if np.isnan(a) else float(a)
+    b = 0.0 if np.isnan(b) else float(b)
     
     fig, ax = plt.subplots()
     ax.scatter(x, y)
@@ -116,6 +125,8 @@ def correlation(df: pd.DataFrame):
             num[col] = num[col].astype("category").cat.codes
     
     corr = num.select_dtypes(include=[np.number]).corr()  # Corrélation uniquement sur le numérique
+
+    corr_filled = corr.fillna(0)
     
     fig, ax = plt.subplots(figsize=(8, 6))
     cax = ax.matshow(corr, cmap='coolwarm')
