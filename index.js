@@ -321,20 +321,14 @@ async function chargerAnalyse(type, titre) {
 }
 
 function verifierAcces() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const isAdmin = urlParams.get('index');
-
+    // Si l'utilisateur est sur la page index.html, on montre tout
+    // car FastAPI ne sert cette page que via la route sécurisée
     const sectionAnalyses = document.getElementById('solutions');
     const lienNavAnalyses = document.getElementById('nav-analyses');
-
-    // Si l'URL contient ?admin=prof2026
-    if (isAdmin === "prof2026") { 
+    
+    if (window.location.pathname.includes('prof-admin-2026')) {
         if(sectionAnalyses) sectionAnalyses.style.display = 'block';
         if(lienNavAnalyses) lienNavAnalyses.style.display = 'block';
-        console.log("Accès administrateur activé");
-    } else {
-        if(sectionAnalyses) sectionAnalyses.style.display = 'none';
-        if(lienNavAnalyses) lienNavAnalyses.style.display = 'none';
     }
 }
 
