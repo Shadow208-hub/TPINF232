@@ -28,18 +28,26 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-if os.path.exists("static"):
-    app.mount("/static", StaticFiles(directory="static"), name="static")
-else:
-    app.mount("/static", StaticFiles(directory="."), name="static")
+STATIC_DIR = "static"
+if os.path.exists(STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.include_router(router)
 
 @app.get("/")
 async def read_public():
-    return FileResponse("index.html")
+    path = os.path.join(STATIC_DIR, "index.html")
+    if os.path.exists(path):
+        return FileResponse(path)
+    return {"status": "API OK", "Placew index.html dans /static/"}
 
 # Route pour le prof (Lien secret) : Affiche l'interface complète
 @app.get("/prof-admin-2026")
 async def read_admin():
-    return FileResponse("index.html")
+    path = os.path.join(STATIC_DIR, "index.html")
+    if os.path.exists(path):
+        return FileResponse(path)
+    return {"message": "index.html introuvable dans /static"} 
     
+PORT = int(os.environ.get("PORT", 8000))
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=PORT)
