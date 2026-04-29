@@ -12,7 +12,7 @@ from pdf_rapport import generate_pdf
 router = APIRouter(prefix="/donnees", tags=["informations"])
 
 
-@router.post("/donnees/", response_model=DataResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=DataResponse, status_code=status.HTTP_201_CREATED)
 def savedate(donnee: DataBase, db: Session = Depends(get_db)):
     """Enregistrer une nouvelle donnée"""
     new_data = Data(**donnee.dict())
