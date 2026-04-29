@@ -4,7 +4,7 @@ let i = 0, j = 0, isDel = false;
 
 function type() {
     const text = document.getElementById('typewriter');
-    if(!text) return;
+    if (!text) return;
     const curr = phrases[i];
     text.innerText = isDel ? curr.substring(0, j--) : curr.substring(0, j++);
     if (!isDel && j > curr.length) { isDel = true; setTimeout(type, 2000); }
@@ -12,86 +12,57 @@ function type() {
     else setTimeout(type, isDel ? 50 : 150);
 }
 
-// Configuration de l'API - À modifier selon votre environnement
-const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-    ? 'http://127.0.0.1:8000' 
+// --- Configuration API (local ou Render) ---
+const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://127.0.0.1:8000'
     : 'https://tpinf232-yohr.onrender.com';
 
-console.log("Tentative de connexion au backend", API_BASE_URL);
+console.log("Connexion au backend :", API_BASE_URL);
 
-// --- FORMULAIRE ---
-document.getElementById('dataForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    // Bloquer les doublons (Sécurité simple par navigateur)
-    if (localStorage.getItem('form_envoye')) {
-        return Swal.fire('Attention', 'Vous avez déjà rempli ce formulaire.', 'warning');
-    }
+// --- RAPPORT PDF dynamique (marche en local ET en prod) ---
+function genererRapportPDF(event) {
+    if (event) event.preventDefault();
+    window.open(`${API_BASE_URL}/donnees/rapport-pdf/generate`, '_blank');
+}
 
-    const payload = {
-        age: parseInt(document.getElementById('age').value),
-        Sexe: document.getElementById('sexe').value,
-        Domaine: document.getElementById('domaine').value,
-        Frequence: parseInt(document.getElementById('frequence').value),
-        Niveau_etude: document.getElementById('niveau_etude').value,
-        Temps_moyen: "1-5 min" // Valeur par défaut
-    };
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/donnees/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-            Swal.fire('Succès !', 'Vos données ont été enregistrées avec succès.', 'success');
-            localStorage.setItem('form_envoye', 'true');
-            document.getElementById('dataForm').reset();
-        } else {
-            const errorData = await response.json().catch(() => ({}));
-            Swal.fire('Erreur', errorData.detail || 'Un problème est survenu lors de l\'envoi.', 'error');
-        }
-    } catch (err) {
-        console.error('Erreur de connexion:', err);
-        Swal.fire('Erreur Serveur', 'L\'API n\'est pas accessible. Vérifiez que le serveur est démarré.', 'error');
-    }
-});
-
+// --- CHART ---
 let myChart = null;
 
 function renderChart(data) {
     const canvas = document.getElementById('myChart');
-    if (!canvas) {
-        console.error('Canvas myChart introuvable');
-        return;
-    }
-    
+    if (!canvas) { console.error('Canvas myChart introuvable'); return; }
+
     const ctx = canvas.getContext('2d');
-    
     if (myChart) myChart.destroy();
 
-    // Logique pour extraire les données selon le format
     let labels = [];
     let values = [];
 
-    // Priorité aux données de fréquence par sexe
     if (data.General && data.General.frequence_sexe) {
+        // /rapport-stats-globale
         labels = Object.keys(data.General.frequence_sexe);
         values = Object.values(data.General.frequence_sexe);
     } else if (data.frequence_par_sexe) {
+        // /analyse-grouper
         labels = Object.keys(data.frequence_par_sexe);
         values = Object.values(data.frequence_par_sexe);
     } else if (data.Moyenne_par_domaine) {
+        // /groupement-data
         labels = Object.keys(data.Moyenne_par_domaine);
         values = Object.values(data.Moyenne_par_domaine);
+    } else if (data.model && data.model.coefficient) {
+        // /rapport-ml : coefficients du modèle
+        labels = ['age', 'Sexe', 'Domaine', 'Niveau_etude'];
+        values = data.model.coefficient;
     } else {
-        // Fallback pour les autres types de groupements
-        labels = Object.keys(data).filter(k => typeof data[k] !== 'object' && !k.includes('graphique') && !k.includes('Histogramme'));
+        labels = Object.keys(data).filter(k =>
+            typeof data[k] !== 'object' &&
+            !k.toLowerCase().includes('graphique') &&
+            !k.toLowerCase().includes('histogramme')
+        );
         values = labels.map(k => data[k]);
     }
 
-    // Vérifier qu'on a des données à afficher
     if (labels.length === 0 || values.length === 0) {
         console.warn('Aucune donnée graphique disponible');
         return;
@@ -100,7 +71,7 @@ function renderChart(data) {
     myChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: labels,
+            labels,
             datasets: [{
                 label: 'Répartition',
                 data: values,
@@ -108,14 +79,11 @@ function renderChart(data) {
                 borderWidth: 1
             }]
         },
-        options: { 
-            responsive: true,
-            maintainAspectRatio: true
-        }
+        options: { responsive: true, maintainAspectRatio: true }
     });
 }
 
-// --- CONTACTS CORRIGÉS ---
+// --- CONTACT ---
 function choisirContact() {
     Swal.fire({
         title: 'Me contacter',
@@ -125,48 +93,33 @@ function choisirContact() {
         confirmButtonColor: '#25D366',
         denyButtonColor: '#38bdf8'
     }).then((result) => {
-        if (result.isConfirmed) {
-            window.open('https://wa.me/237654027389', '_blank');
-        } else if (result.isDenied) {
-            window.location.href = "mailto:brandotatsa@gmail.com";
-        }
+        if (result.isConfirmed) window.open('https://wa.me/237654027389', '_blank');
+        else if (result.isDenied) window.location.href = "mailto:brandotatsa@gmail.com";
     });
 }
 
-// --- CHARGEMENT DES ANALYSES (Lien Backend-Chart.js) ---
+// --- CHARGEMENT DES ANALYSES ---
 async function chargerAnalyse(type, titre) {
     try {
         let endpoint = '';
-        
-        // Mapper les types d'analyse aux bons endpoints
-        switch(type) {
-            case 'analyse-age':
-                endpoint = `${API_BASE_URL}/donnees/rapport-stats-globale`;
-                break;
-            case 'analyse-par-domaine':
-                endpoint = `${API_BASE_URL}/donnees/groupement-data`;
-                break;
-            case 'train_model':
-                endpoint = `${API_BASE_URL}/donnees/rapport-ml`;
-                break;
-            case 'analyse-grouper':
-                endpoint = `${API_BASE_URL}/donnees/analyse-grouper`;
-                break;
-            default:
-                endpoint = `${API_BASE_URL}/donnees/rapport-stats-globale`;
+        switch (type) {
+            case 'analyse-age':         endpoint = `${API_BASE_URL}/donnees/rapport-stats-globale`; break;
+            case 'analyse-par-domaine': endpoint = `${API_BASE_URL}/donnees/groupement-data`;       break;
+            case 'train_model':         endpoint = `${API_BASE_URL}/donnees/rapport-ml`;            break;
+            case 'analyse-grouper':     endpoint = `${API_BASE_URL}/donnees/analyse-grouper`;       break;
+            default:                    endpoint = `${API_BASE_URL}/donnees/rapport-stats-globale`;
         }
 
         const response = await fetch(endpoint);
-        
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.detail || `Erreur serveur (${response.status})`);
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || `Erreur serveur (${response.status})`);
         }
-        
+
         const data = await response.json();
-        
-        const overlay = document.getElementById('result-overlay');
-        const title = document.getElementById('result-title');
+
+        const overlay   = document.getElementById('result-overlay');
+        const title     = document.getElementById('result-title');
         const container = document.querySelector('.modal-content');
 
         if (!overlay || !title || !container) {
@@ -174,33 +127,20 @@ async function chargerAnalyse(type, titre) {
             return;
         }
 
-        // Nettoyage des anciens textes de stats pour éviter l'accumulation
         const oldStats = document.getElementById('stats-text');
         if (oldStats) oldStats.remove();
 
         overlay.style.display = 'flex';
         title.innerText = titre;
 
-        // --- AFFICHAGE DES DONNÉES TEXTUELLES ---
         const statsDiv = document.createElement('div');
         statsDiv.id = 'stats-text';
-        statsDiv.style.marginBottom = '20px';
-        statsDiv.style.color = '#fff';
-        statsDiv.style.maxHeight = '300px';
-        statsDiv.style.overflowY = 'auto';
+        statsDiv.style.cssText = 'margin-bottom:20px; color:#fff; max-height:300px; overflow-y:auto;';
 
-        let htmlContent = "";
-        
-        // Fonction récursive pour afficher les données imbriquées
+        let htmlContent = '';
         function afficherDonnees(obj, prefix = '') {
             for (const [key, value] of Object.entries(obj)) {
-                // Ne pas afficher les graphiques en texte
-                if (key.toLowerCase().includes('graphique') || 
-                    key.toLowerCase().includes('histogramme') || 
-                    key.toLowerCase().includes('heatmap')) {
-                    continue;
-                }
-                
+                if (['graphique','histogramme','heatmap'].some(k => key.toLowerCase().includes(k))) continue;
                 if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
                     htmlContent += `<p><strong>${prefix}${key.replace(/_/g, ' ')} :</strong></p>`;
                     afficherDonnees(value, '&nbsp;&nbsp;');
@@ -211,49 +151,85 @@ async function chargerAnalyse(type, titre) {
                 }
             }
         }
-        
         afficherDonnees(data);
         statsDiv.innerHTML = htmlContent;
-        
-        // On insère les textes avant le canvas du graphique
         title.after(statsDiv);
 
-        // --- AFFICHAGE DU GRAPHIQUE ---
         renderChart(data);
 
     } catch (err) {
         console.error('Erreur lors du chargement:', err);
-        Swal.fire('Erreur', `Impossible de charger les statistiques: ${err.message}`, 'error');
+        Swal.fire('Erreur', `Impossible de charger les statistiques : ${err.message}`, 'error');
     }
 }
 
+// --- ACCÈS ADMIN ---
 function verifierAcces() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const isAdmin = urlParams.get('admin');
-
+    const isAdmin = new URLSearchParams(window.location.search).get('admin');
     const sectionAnalyses = document.getElementById('solutions');
     const lienNavAnalyses = document.getElementById('nav-analyses');
 
-    // Si l'URL contient ?admin=prof2026
-    if (isAdmin === "prof2026") { 
-        if(sectionAnalyses) sectionAnalyses.style.display = 'block';
-        if(lienNavAnalyses) lienNavAnalyses.style.display = 'block';
+    if (isAdmin === "prof2026") {
+        if (sectionAnalyses) sectionAnalyses.style.display = 'block';
+        if (lienNavAnalyses) lienNavAnalyses.style.display = 'block';
         console.log("Accès administrateur activé");
     } else {
-        if(sectionAnalyses) sectionAnalyses.style.display = 'none';
-        if(lienNavAnalyses) lienNavAnalyses.style.display = 'none';
+        if (sectionAnalyses) sectionAnalyses.style.display = 'none';
+        if (lienNavAnalyses) lienNavAnalyses.style.display = 'none';
     }
 }
 
-// Initialisation
-document.addEventListener('DOMContentLoaded', ()=>{
-    type();
-    verifierAcces();
-});
-
+// --- FERMER MODAL ---
 function fermerModal() {
     const overlay = document.getElementById('result-overlay');
-    if (overlay) {
-        overlay.style.display = 'none';
-    }
+    if (overlay) overlay.style.display = 'none';
 }
+
+// ✅ CORRECTION 3 : Tout ce qui dépend du DOM est dans DOMContentLoaded
+// → Le listener 'submit' ne plante plus si le script charge avant le HTML
+document.addEventListener('DOMContentLoaded', () => {
+    type();
+    verifierAcces();
+
+    const form = document.getElementById('dataForm');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (localStorage.getItem('form_envoye')) {
+                return Swal.fire('Attention', 'Vous avez déjà rempli ce formulaire.', 'warning');
+            }
+
+            const payload = {
+                age:          parseInt(document.getElementById('age').value),
+                Sexe:         document.getElementById('sexe').value,
+                Domaine:      document.getElementById('domaine').value,
+                Frequence:    parseInt(document.getElementById('frequence').value),
+                Niveau_etude: document.getElementById('niveau_etude').value,
+                Temps_moyen:  "1-5 min"
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/donnees/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    Swal.fire('Succès !', 'Vos données ont été enregistrées avec succès.', 'success');
+                    localStorage.setItem('form_envoye', 'true');
+                    form.reset();
+                    const label = document.querySelector('#label-frequence strong');
+                    if (label) label.innerText = '15';
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    Swal.fire('Erreur', errorData.detail || "Un problème est survenu lors de l'envoi.", 'error');
+                }
+            } catch (err) {
+                console.error('Erreur de connexion:', err);
+                Swal.fire('Erreur Serveur', "L'API n'est pas accessible. Vérifiez que le serveur est démarré.", 'error');
+            }
+        });
+    }
+});
