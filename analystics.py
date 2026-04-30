@@ -22,6 +22,13 @@ def histogramme(fig):
 
 def stat(df: pd.DataFrame):
     """Statistiques générales"""
+    if df is None or df.empty:
+        return {
+            "Age_moyen": 0.0,
+            "Age_median": 0.0,
+            "frequence_sexe": {},
+            "Histogramme_age": ""
+    }   
     Frequences_sexe = df['Sexe'].value_counts().to_dict()
     age_moyen = df['age'].mean()
     age_median = df['age'].median()
@@ -41,6 +48,19 @@ def stat(df: pd.DataFrame):
 
 def analyse_age(df: pd.DataFrame):
     """Analyse de la corrélation entre âge et fréquence"""
+    if df is None or df.empty or len(df) < 2:
+        return {
+            "Coefficient de correlation": 0.0,
+            "Graphique": ""
+        }
+    df['age'] = pd.to_numeric(df['age'], errors='coerce')
+    df['Frequence'] = pd.to_numeric(df['Frequence'], errors='coerce')
+    df = df.dropna()
+    if len(df) < 2:
+        return {
+            "Coefficient de correlation": 0.0,
+            "Graphique": ""
+        }
     correlation = df['age'].corr(df['Frequence'])
     # Nuage de points
     if np.isnan(correlation):
@@ -117,6 +137,12 @@ def regression(df: pd.DataFrame):
 
 def correlation(df: pd.DataFrame):
     """Matrice de corrélation"""
+    if df is None or df.empty or len(df) < 2:
+        return {
+            "Matrice": {},
+            "heatmap": ""
+        }
+        
     num = df.copy()
     # CORRECTION: Nom de colonne corrigé de "Niveau_etudes" à "Niveau_etude"
     cols_to_encode = ["Sexe", "Domaine", "Niveau_etude"]
@@ -124,16 +150,21 @@ def correlation(df: pd.DataFrame):
         if col in num.columns:
             num[col] = num[col].astype("category").cat.codes
     
-    corr = num.select_dtypes(include=[np.number]).corr()  # Corrélation uniquement sur le numérique
-
+    num = num.select_dtypes(include=[np.number])  # Corrélation uniquement sur le numérique
+    if num.shape[1]<2:
+        return {
+            "matrice": {},
+            "heatmap": ""
+        }
+        
     corr_filled = corr.fillna(0)
     
     fig, ax = plt.subplots(figsize=(8, 6))
     cax = ax.matshow(corr, cmap='coolwarm')
     fig.colorbar(cax)
     
-    plt.xticks(range(len(corr.columns)), corr.columns, rotation=45)
-    plt.yticks(range(len(corr.columns)), corr.columns)
+    ax.set_xticks(range(len(corr.columns)), corr.columns, rotation=45)
+    ax.set_yticks(range(len(corr.columns)), corr.columns)
     plt.tight_layout()
     
     return {
